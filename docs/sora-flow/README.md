@@ -1,5 +1,5 @@
 <!--
-Copyright 2026 HASEBA Junya (7pairs)
+SPDX-FileCopyrightText: 2026 HASEBA Junya (7pairs)
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
