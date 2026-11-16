@@ -1,0 +1,9 @@
+hmc
+Copyright 2026 HASEBA Junya (7pairs)
+Source: https://github.com/7pairs/hmc
+
+This attribution applies to the hmc files licensed under the Apache License,
+Version 2.0. The contents of docs/sdd/ and docs/sora-flow/, and third-party
+works that may be incorporated into the repository, are outside the scope of
+hmc's Apache License, Version 2.0. See the notices for those works for their
+applicable terms.

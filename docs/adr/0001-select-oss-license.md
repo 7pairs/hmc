@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+Source: https://github.com/7pairs/hmc
+-->
+
 # 0001 ライセンスにApache License, Version 2.0を採用する
 
 - **ステータス**　採用

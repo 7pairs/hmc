@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+Source: https://github.com/7pairs/hmc
+-->
+
 # Project Instructions
 
 ## Japanese Documents
