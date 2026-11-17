@@ -15,7 +15,7 @@ Source: https://github.com/7pairs/hmc
 
 - [x] [1. テンプレートと開発環境を確認する](#1-テンプレートと開発環境を確認する)
 - [x] [2. 初期画面の仕様・設計・テスト項目を決める](#2-初期画面の仕様設計テスト項目を決める)
-- [ ] [3. テンプレートからアプリを作り共通画面を実装する](#3-テンプレートからアプリを作り共通画面を実装する)
+- [x] [3. テンプレートからアプリを作り共通画面を実装する](#3-テンプレートからアプリを作り共通画面を実装する)
 - [ ] [4. 両OSで起動しコード構成を確認する](#4-両osで起動しコード構成を確認する)
 
 ## 目的と対象
@@ -159,3 +159,21 @@ Android StudioとKotlin Multiplatformプラグイン、Xcode、Android SDKは調
 #### 手順2の検証結果
 
 そらは仕様と設計を合意済みの作業範囲に照らし合わせた。アプリ名と `hmc` の表示は両OSの手動テスト、アプリ識別子と最低対応OSはビルド成果物の設定確認、共通画面の呼び出しと標準スタイルはコードの確認に対応していることを確かめた。二人で仕様・設計・テスト項目とレビュー結果を確認し、手順2を完了とした。
+
+### 手順3の作業記録
+
+`androidApp` の `MainActivity` と `iosApp` のSwiftUIの起動処理を、`shared` の共通画面 `App()` につないだ。博物館のサンプルと依存関係、画像・アイコン、デスクトップとWebのモジュールを取り込み範囲から外した。テンプレート由来のテキストファイルに出典を示し、改変したファイルに変更した旨を記した。Gradle WrapperのスクリプトとJARの出典およびJARのSHA-256は `NOTICE` に記録した。JARのSHA-256と、配布ZIPに指定したSHA-256はGradle 9.5.1の公開値と一致した。[NOTICE](../../NOTICE)・[Gradleのチェックサム](https://gradle.org/release-checksums/)
+
+Androidの起動処理で使うCompose Runtimeを `androidApp` の依存関係に加え、共通モジュールと同じバージョンに揃えた。共通モジュールのAndroidターゲットには、AGP 9.1.1で使用できる `android` ブロックを使った。[AndroidのKMPライブラリプラグイン](https://developer.android.com/kotlin/multiplatform/plugin)
+
+最初のXcodeビルドで汎用のシミュレータを指定したところ、XcodeはGradleに `x86_64` 向けのフレームワークも要求した。共通モジュールのiOSシミュレータ向けターゲットに合わせ、Xcodeのシミュレータ向け設定から `x86_64` を除外した。
+
+Android Studio Rabbit 2 | 2026.2.2 Patch 1でGradle同期に成功した。同期に使われたGradleデーモンのログでは、Javaのメジャーバージョンは25、ベンダーは `JetBrains s.r.o.`、JavaホームはAndroid Studio同梱の `~/Applications/Android Studio.app/Contents/jbr/Contents/Home` だった。そのJavaホームの `java -version` は25.0.4だった。
+
+AndroidはJBR 25.0.4で `:androidApp:assembleDebug` に成功した。iOSは同じJDKを使い、Xcode 27.2で `CODE_SIGNING_ALLOWED=NO` を指定したarm64シミュレータ向けDebugビルドに成功した。APKと `.app` の識別子はいずれも `blue.lions.hmc` だった。ビルド成果物に記録された最低対応OSはAndroid API 24とiOS 18.5だった。iOSのデバッグシンボルを生成するときに `Shared.framework` の一部のオブジェクトを開けないという警告が出た。両OSでの起動と表示は手順4で確認する。
+
+#### 手順3の独立レビュー
+
+うみは両OSから共通画面を呼び出すコード、アプリの設定、テンプレートの出典と変更表示、ビルド結果を確認した。実装に修正を求める指摘はなかった。
+
+二人で実装の内容、Gradle同期と両OSのビルド結果、うみのレビュー結果を確認し、手順3を完了とした。

@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Source: https://github.com/Kotlin/KMP-App-Template/blob/6b6d09e4f3f5e845116422d59b658791ed6149c6/iosApp/Configuration/Config.xcconfig
+// Modified for hmc (https://github.com/7pairs/hmc).
+
+TEAM_ID=
+BUNDLE_ID=blue.lions.hmc
+APP_NAME=hmc
