@@ -11,7 +11,7 @@ class MatchResultsTest {
     private val mLeaguePoints = PlacementPoints(50, 10, -10, -30)
 
     @Test
-    fun `when one score is negative, all results stay in input order`() {
+    fun `returns all results in input order even with a negative score`() {
         assertResults(
             RawScores(20_100, 50_000, -1_100, 31_000),
             listOf(PlayerResult(3, -199), PlayerResult(1, 700), PlayerResult(4, -611), PlayerResult(2, 110)),
@@ -19,7 +19,7 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when two players tie for first, they split first and second place points`() {
+    fun `splits first and second place points between players tied for first`() {
         assertResults(
             RawScores(35_000, 20_000, 35_000, 10_000),
             listOf(PlayerResult(1, 350), PlayerResult(3, -200), PlayerResult(1, 350), PlayerResult(4, -500)),
@@ -27,7 +27,7 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when two players tie for second, they split second and third place points`() {
+    fun `splits second and third place points between players tied for second`() {
         assertResults(
             RawScores(40_000, 25_000, 25_000, 10_000),
             listOf(PlayerResult(1, 600), PlayerResult(2, -50), PlayerResult(2, -50), PlayerResult(4, -500)),
@@ -35,7 +35,7 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when two pairs tie, their places are first and third`() {
+    fun `assigns first and third place when two pairs tie`() {
         assertResults(
             RawScores(35_000, 15_000, 35_000, 15_000),
             listOf(PlayerResult(1, 350), PlayerResult(3, -350), PlayerResult(1, 350), PlayerResult(3, -350)),
@@ -43,7 +43,7 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when tied players split an odd number of placement points, they keep the half point`() {
+    fun `preserves the half point when tied players split an odd number of placement points`() {
         assertResults(
             RawScores(35_000, 20_000, 35_000, 10_000),
             listOf(PlayerResult(1, 355), PlayerResult(3, -210), PlayerResult(1, 355), PlayerResult(4, -500)),
@@ -52,7 +52,7 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when the sum of tied placement points exceeds the Int range, the split stays exact`() {
+    fun `splits placement points exactly even when their sum exceeds the Int range`() {
         assertResults(
             RawScores(35_000, 20_000, 35_000, 10_000),
             listOf(
@@ -66,32 +66,32 @@ class MatchResultsTest {
     }
 
     @Test
-    fun `when a score is not a multiple of 100, a valid total still yields an increment error`() {
+    fun `rejects a score that is not a multiple of 100 even when the total is valid`() {
         assertFailure(RawScores(50_050, 30_950, 20_000, -1_000), MatchFailureReason.INVALID_SCORE_INCREMENT)
     }
 
     @Test
-    fun `when scores do not add up to 100000, the result is a total error`() {
+    fun `reports a total error when scores do not add up to 100000`() {
         assertFailure(RawScores(50_000, 30_000, 20_000, -1_000), MatchFailureReason.INVALID_SCORE_TOTAL)
     }
 
     @Test
-    fun `when three players tie, the result is an unsupported tie error`() {
+    fun `reports an unsupported tie error when three players tie`() {
         assertFailure(RawScores(30_000, 30_000, 30_000, 10_000), MatchFailureReason.UNSUPPORTED_TIE)
     }
 
     @Test
-    fun `when all four players tie, the result is an unsupported tie error`() {
+    fun `reports an unsupported tie error when all four players tie`() {
         assertFailure(RawScores(25_000, 25_000, 25_000, 25_000), MatchFailureReason.UNSUPPORTED_TIE)
     }
 
     @Test
-    fun `when both the increment and total are invalid, the increment error takes precedence`() {
+    fun `reports the increment error first when both the increment and total are invalid`() {
         assertFailure(RawScores(50_050, 30_000, 20_000, -1_000), MatchFailureReason.INVALID_SCORE_INCREMENT)
     }
 
     @Test
-    fun `when three players tie and the total is invalid, the total error takes precedence`() {
+    fun `reports the total error first when three players tie and the total is invalid`() {
         assertFailure(RawScores(30_000, 30_000, 30_000, 9_000), MatchFailureReason.INVALID_SCORE_TOTAL)
     }
 
