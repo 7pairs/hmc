@@ -30,6 +30,8 @@ kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11
         }
+
+        withHostTest {}
     }
 
     sourceSets {
@@ -38,6 +40,9 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }
