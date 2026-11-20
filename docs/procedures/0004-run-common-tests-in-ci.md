@@ -6,7 +6,7 @@ Source: https://github.com/7pairs/hmc
 
 # 0004 GitHub Actionsで共通テストを実行する
 
-- **ステータス**　作業中
+- **ステータス**　完了
 - **作業ブランチ**　`work/0004-run-common-tests-in-ci`
 
 作業は[開発プロセス](../development-process.md)と[SDD](../sdd/README.md)に従う。各手順の検証とレビューの結果を二人で確認し、次の手順に合意した上でオーナーから着手依頼を受ける。
@@ -15,7 +15,7 @@ Source: https://github.com/7pairs/hmc
 
 - [x] [1. CIの実行環境とテスト結果の確認方法を決める](#1-ciの実行環境とテスト結果の確認方法を決める)
 - [x] [2. 共通テストを実行するワークフローを追加する](#2-共通テストを実行するワークフローを追加する)
-- [ ] [3. ドラフトPRで実行を確認し開発プロセスを更新する](#3-ドラフトprで実行を確認し開発プロセスを更新する)
+- [x] [3. ドラフトPRで実行を確認し開発プロセスを更新する](#3-ドラフトprで実行を確認し開発プロセスを更新する)
 
 ## 目的と対象
 
@@ -116,3 +116,33 @@ GitHubの設定でテストの成功を必須にする作業は、次のPRを進
 そらはmacOS上でTemurin 25.0.4を使ってワークフローと同じGradleコマンドを実行し、12件すべてが成功してXMLとHTMLのレポートが生成されたことを確認した。仮のSDKと `sdkmanager` を使い、不足パッケージだけがインストール対象に選ばれることを確かめた。テスト用のレポートでは、XMLとHTMLがそろえば確認が成功し、片方でも欠ければ失敗することを確かめた。
 
 うみは起動条件、実行環境、レポートの保存条件などを手順1の合意と照合した。修正が必要な指摘はなかった。二人で検証とレビューの結果を確認し、手順2を完了とした。
+
+### 手順3の作業記録
+
+#### ドラフトPRでのCIの検証
+
+`develop` 向けのドラフトPR #7を作成すると、`Common tests` の `Android host tests` が起動した。初回はGradleがMaven Centralから依存関係を取得できず、テスト実行前に失敗した。失敗時のログで `Resource missing` と表示されたPOMのうち、GsonとSLF4JのURLは調査時にHTTP 200を返した。取得に失敗した原因は特定できていない。[ドラフトPR #7](https://github.com/7pairs/hmc/pull/7)・[初回のジョブ](https://github.com/7pairs/hmc/actions/runs/44709329166/job/136196712317)
+
+設定を変えずに同じジョブを再実行すると、約1分33秒で成功した。PRのヘッドは `498fe8ea9161cd3250edb88079b1131bbf2e0934`。ログに出た一時マージコミット `33c7dc6ea3a8628f8b994f805e3adb767db1a6dd` は、確認時点のPRの一時マージコミットと一致した。[再実行のジョブ](https://github.com/7pairs/hmc/actions/runs/44709329166/job/136201725706)
+
+使用したランナーイメージは `ubuntu-24.04` の `20261111.370` だった。ログでSDKの `android-37.0` と Build Tools `36.0.0` を確認した。Gradleデーモンが使ったのは、ランナーにインストール済みの Temurin 25.0.5（`/usr/lib/jvm/temurin-25-jdk-amd64/bin/java`）だった。`setup-java` が設定した `JAVA_HOME`（`/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/25.0.5-8/x64`）とはパスが異なるが、デーモンが使ったJDKの配布元とメジャーバージョンは手順1の合意どおりだった。[ランナーイメージの情報](https://github.com/actions/runner-images/blob/ubuntu24/20261111.370/images/ubuntu/Ubuntu2404-Readme.md)・[再実行のログ](https://github.com/7pairs/hmc/actions/runs/44709329166/job/136201725706)
+
+ログで `:shared:testAndroidHostTest` の実行を確認した。`android-host-test-results` をダウンロードし、XMLとHTMLの両方があり、12件すべてが成功して失敗・エラー・スキップが各０件だったことを確かめた。[テスト結果のアーティファクト](https://github.com/7pairs/hmc/actions/runs/44709329166/artifacts/14617068113)
+
+#### 構成の見直し
+
+二人はワークフローとGradle設定の整理を見送った。１つのジョブで環境の準備、テストの実行、レポートの保存を順に追えるため、処理を別のスクリプトに切り出す必要はないと判断した。Gradleデーモンは手順1で合意したTemurin 25を使っていた。今後 `compileSdk` を上げるときは、ワークフローで準備するSDKパッケージも見直す。
+
+#### 理解の確認
+
+そらは、ドラフトを含む `develop` 向けPRの作成や更新でジョブが起動し、PRの一時マージコミットで共通テストを実行した結果をActionsの実行ページにある `android-host-test-results` のXMLとHTMLで確認できることを説明した。
+
+CIが成功した後に `develop` に別のPRがマージされた場合を題材に、小テストを行った。オーナーは `Common tests` の `Android host tests` を対象に、ログのSHAを照合して、以前に成功した実行がマージ前の確認に使えるか判断すると説明した。使える実行がなければ `develop` の変更をPRブランチに取り込み、新しい実行が成功したこととSHAが一致することを確認すると説明した。
+
+そらは、照合に使うSHAが `Run Android host tests` ステップのログの `Checked-out commit` にあり、照合相手はマージ直前にGitHubがPR用に作る一時マージコミットのSHAだと補足した。小テストでは、オーナーが確認するジョブと、対応する実行がない場合の手順を自分の言葉で説明できたことを確認した。
+
+#### 独立レビューと完了
+
+うみはドラフトPRのCIの検証結果、開発プロセスの変更、構成の整理を見送った判断、小テストの記録を確認した。修正が必要な指摘はなかった。起動条件からレポートの確認先までそらが説明したことも記録するよう提案があり、二人で採用した。
+
+二人で検証とレビューの結果を確認し、手順3と手順書全体を完了とした。
