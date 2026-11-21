@@ -5,7 +5,7 @@
 package blue.lions.hmc
 
 private const val SCORE_INCREMENT = 100L
-private const val EXPECTED_SCORE_TOTAL = 100_000L
+internal const val EXPECTED_SCORE_TOTAL = 100_000L
 private const val RETURN_SCORE = 30_000L
 private const val SCORE_POINTS_PER_TENTH = 100L
 private const val TENTHS_PER_POINT = 10L

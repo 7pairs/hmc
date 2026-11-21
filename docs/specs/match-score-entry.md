@@ -38,6 +38,8 @@ Source: https://github.com/7pairs/hmc
 
 `shared/src/commonMain` の `App()` から共通の入力画面を表示する。入力欄はMaterial 3の `OutlinedTextField` に `TextFieldState` を渡す。キーボードに隠れる欄やボタン、縦の表示領域が狭いときの結果にはスクロールで到達できるようにする。既存の `MaterialTheme` を使い、画面で個別に色が必要な場合は `MaterialTheme.colorScheme` の役割に合った色を参照する。
 
+共通画面は `imePadding()` でキーボードが占める領域を避ける。Androidではキーボードの領域を取得できるよう、Manifestの `MainActivity` に `android:windowSoftInputMode="adjustResize"` を指定する。[Androidのエッジツーエッジ設定](https://developer.android.com/develop/ui/compose/system/setup-e2e#configure-windowsoftinputmode)
+
 `InputTransformation` で編集後の文字列全体が `-?[0-9]*` に当てはまるかを判定する。形式から外れる編集は `revertAllChanges()` で取り消す。同じ文字列への置き換えも編集履歴に残さないよう、文字の変更を `revertAllChanges()` で取り消してから、置き換え後の選択範囲を反映する。`KeyboardOptions` では `KeyboardType.NumberSigned` を指定する。Compose Multiplatform 1.12.2のiOS標準のテキスト入力ではこの指定が通常のキーボードにフォールバックするため、マイナスを入力できることを両OSで確かめる。[Composeの入力変換](https://developer.android.com/develop/ui/compose/text/user-input#filter-user-input-with-input-transformations)
 
 入力形式の判定と、確認時の変換・計算・表示用データの作成は共通Kotlinで行う。確認時は４欄の文字列を固定順に読み取り、空欄を判別したうえで `toIntOrNull()` を使う。４件とも変換できたら `RawScores` と `PlacementPoints(50, 10, -10, -30)` を `calculateMatchResults` に渡す。成功時は同じ位置の名前、素点、`PlayerResult` を１行分のデータにまとめる。成績ポイントは `pointsInTenths` の整数演算で符号と小数１桁を組み立てる。失敗時は理由を画面の文言に対応付ける。[半荘成績の設計](match-results.md#設計)
@@ -81,7 +83,7 @@ Source: https://github.com/7pairs/hmc
 
 | 項目 | 確認方法と期待する結果 |
 | --- | --- |
-| 起動と入力 | 選手AからDが固定順で並び、４欄とも空欄で始まる。画面のキーボードで `-` に続けて `1100` を打てる。縦の表示領域が狭い状態でも、スクロールして４欄と「成績を確認」に到達できる。 |
+| 起動と入力 | 選手AからDが固定順で並び、４欄とも空欄で始まる。画面のキーボードで `-` に続けて `1100` を打てる。縦の表示領域が狭い状態でキーボードを開いたままスクロールし、４欄と「成績を確認」に到達できる。 |
 | 貼り付け | 成績を表示してから既存の値を選択して `35,000` を貼り付け、元の値と成績が残ることを確かめる。同じ操作で `35000` が入ることを確かめる。 |
 | 同じ文字列への置き換えと元に戻す操作 | `20100` を `20100` で置き換えても成績は残る。成績確認後に `1` を挿入し、入力欄で元に戻すと `20100` に戻り、成績は表示されない。 |
 | 入力エラー | 空欄と `-` 単体を含む状態で確認し、それぞれの欄に理由が出る。次に全欄を整数にして合計を100,000点からずらし、画面に合計の理由が出る。 |
