@@ -8,18 +8,18 @@ Source: https://github.com/7pairs/hmc
 
 ## 仕様
 
-AndroidとiOSでアプリを起動すると、アプリの表示領域の中央に小文字の `hmc` だけを１行で表示する。文字と背景には標準のスタイルを使う。ホーム画面などでOSが表示するアプリ名も `hmc` とする。
+AndroidとiOSでアプリを新しく起動すると、共通の素点入力画面を表示する。「選手A」から「選手D」までを固定順に並べ、４人の素点欄は空欄で始める。ホーム画面などでOSが表示するアプリ名は `hmc` とする。[素点入力と成績表示の仕様](match-score-entry.md#仕様)
 
 | 項目 | Android | iOS |
 | --- | --- | --- |
 | アプリ識別子 | アプリID `blue.lions.hmc` | Bundle ID `blue.lions.hmc` |
 | 最低対応OS | Android 7.0（`minSdk 24`） | iOS 18.5 |
 
-今回の対象は両OSの起動処理から共通のCompose画面を表示できるところまでとする。iOSの最低対応バージョンは、手順1の試験ビルドで一部のライブラリが18.5向けだったことを踏まえて決めた。[手順書0002の試験結果](../procedures/0002-bootstrap-app.md#ツールの組み合わせと試験ビルド)
+iOSの最低対応バージョンは、手順書0002の試験ビルドで一部のライブラリが18.5向けだったことを踏まえて決めた。[手順書0002の試験結果](../procedures/0002-bootstrap-app.md#ツールの組み合わせと試験ビルド)
 
 ## 設計
 
-手順1で採用したテンプレートの `androidApp`、`iosApp`、`shared` の構成を使う。共通画面は `shared/src/commonMain/kotlin/blue/lions/hmc/App.kt` に置く。`App()` ではCompose Material 3の標準テーマを適用し、`Surface` で背景を描画する。表示領域いっぱいに広げた `Box` の中央に `Text("hmc")` を配置する。
+手順書0002で採用したテンプレートの `androidApp`、`iosApp`、`shared` の構成を使う。`shared/src/commonMain/kotlin/blue/lions/hmc/App.kt` の `App()` でCompose Material 3の標準テーマを適用し、`Surface` の中で `ScoreEntryScreen()` を表示する。[素点入力と成績表示の設計](match-score-entry.md#設計)
 
 | OS | 起動処理から共通画面を呼ぶ経路 |
 | --- | --- |
@@ -34,14 +34,14 @@ iOSは `iosApp/Configuration/Config.xcconfig` の `BUNDLE_ID` を `blue.lions.hm
 
 ## テスト項目
 
-手順4で同じソースのDebugビルドを両OSで確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。
+同じソースのDebugビルドを両OSで起動し、アプリ名と最初に表示される画面を確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。素点入力画面での操作は手順書0005の手順3で確かめる。[素点入力と成績表示のテスト項目](match-score-entry.md#androidとiosでの画面確認)
 
 `apkanalyzer` が `PATH` にない場合は、Android SDK内の `cmdline-tools/latest/bin/apkanalyzer` を使う。
 
 | 項目 | 確認方法 | 期待する結果 |
 | --- | --- | --- |
-| Androidの起動と表示 | Debug APKをAndroid 17エミュレータにインストールし、ランチャーに表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。起動するとアプリの表示領域の中央に小文字の `hmc` だけが１行で表示される。 |
-| iOSの起動と表示 | iOSシミュレータ向けのDebug `.app` をiOS 27.2シミュレータにインストールし、ホーム画面に表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。起動するとアプリの表示領域の中央に小文字の `hmc` だけが１行で表示される。 |
+| Androidの起動と表示 | Debug APKをインストールし、ランチャーに表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。新しく起動すると４人の素点欄が空欄の素点入力画面を表示する。 |
+| iOSの起動と表示 | Debugビルドをインストールし、ホーム画面に表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。新しく起動すると４人の素点欄が空欄の素点入力画面を表示する。 |
 | Androidの設定 | `apkanalyzer manifest application-id <APK>` と `apkanalyzer manifest min-sdk <APK>` で、起動に使うAPKを確認する。[APK Analyzerのコマンド](https://developer.android.com/tools/apkanalyzer) | アプリIDは `blue.lions.hmc`、最低APIレベルは24。 |
 | iOSの設定 | 起動に使う `.app` 内の `Info.plist` から `CFBundleIdentifier` と `MinimumOSVersion` を読む。`plutil -extract <キー> raw -o - <Info.plist>` を使う。 | Bundle IDは `blue.lions.hmc`、最低対応OSは18.5。 |
-| 共通画面の呼び出しとスタイル | 設計に示したAndroidとiOSの起動経路をコードでたどり、共通画面のスタイルを確認する。 | どちらの経路も `shared/src/commonMain` の同じ `App()` を呼び出し、共通画面はMaterial 3の標準テーマで文字と背景を描画する。 |
+| 共通画面の呼び出しとスタイル | 設計に示したAndroidとiOSの起動経路をコードでたどり、共通画面のスタイルを確認する。 | どちらの経路も `shared/src/commonMain` の同じ `App()` を呼び出し、Material 3の標準テーマを適用した素点入力画面を表示する。 |
