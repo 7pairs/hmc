@@ -74,12 +74,12 @@ class ScoreConfirmationTest {
 
     @Test
     fun `shows the expected total with a thousands separator`() {
-        assertCalculationError(listOf("50000", "30000", "20000", "-1000"), "４人の素点の合計を100,000点にしてください。")
+        assertCalculationError(listOf("50000", "30000", "20000", "-1000"), "4人の素点の合計を100,000点にしてください。")
     }
 
     @Test
     fun `tells the user to record three way ties on paper`() {
-        assertCalculationError(listOf("30000", "30000", "30000", "10000"), "３人以上が同点の半荘は紙に記録してください。")
+        assertCalculationError(listOf("30000", "30000", "30000", "10000"), "3人以上が同点の半荘は紙に記録してください。")
     }
 
     @Test

@@ -64,8 +64,8 @@ internal fun confirmScores(inputs: List<String>): ScoreConfirmation {
 
 private fun MatchFailureReason.message(): String = when (this) {
     MatchFailureReason.INVALID_SCORE_INCREMENT -> "素点は100点刻みで入力してください。"
-    MatchFailureReason.INVALID_SCORE_TOTAL -> "４人の素点の合計を${formatScore(EXPECTED_SCORE_TOTAL)}点にしてください。"
-    MatchFailureReason.UNSUPPORTED_TIE -> "３人以上が同点の半荘は紙に記録してください。"
+    MatchFailureReason.INVALID_SCORE_TOTAL -> "4人の素点の合計を${formatScore(EXPECTED_SCORE_TOTAL)}点にしてください。"
+    MatchFailureReason.UNSUPPORTED_TIE -> "3人以上が同点の半荘は紙に記録してください。"
 }
 
 private fun formatScore(score: Long): String {

@@ -21,8 +21,8 @@ Source: https://github.com/7pairs/hmc
 | 計算が返す理由 | 画面の文言案 |
 | --- | --- |
 | `INVALID_SCORE_INCREMENT` | 素点は100点刻みで入力してください。 |
-| `INVALID_SCORE_TOTAL` | ４人の素点の合計を100,000点にしてください。 |
-| `UNSUPPORTED_TIE` | ３人以上が同点の半荘は紙に記録してください。 |
+| `INVALID_SCORE_TOTAL` | 4人の素点の合計を100,000点にしてください。 |
+| `UNSUPPORTED_TIE` | 3人以上が同点の半荘は紙に記録してください。 |
 
 今回のルールでは4人の素点の合計を100,000点に固定する。
 
