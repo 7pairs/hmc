@@ -6,8 +6,8 @@ Source: https://github.com/7pairs/hmc
 
 # 0002 AndroidとiOSでhmcの初期画面を起動する
 
-- **ステータス**　完了
-- **作業ブランチ**　`work/0002-bootstrap-app`
+- **ステータス** 完了
+- **作業ブランチ** `work/0002-bootstrap-app`
 
 作業は[開発プロセス](../development-process.md)と[SDD](../sdd/README.md)に従う。各手順の検証とレビュー結果を二人で確認し、次の手順に合意した上でオーナーから着手依頼を受ける。
 
@@ -20,7 +20,7 @@ Source: https://github.com/7pairs/hmc
 
 ## 目的と対象
 
-Kotlin MultiplatformとCompose Multiplatformを使い、AndroidとiOSの両方で同じCompose画面に `hmc` と表示する。オーナーは両OSの起動処理から共通画面までコードをたどり、それぞれの技術が何を担うかを学ぶ。[プロジェクト憲章](../project-charter.md)
+Kotlin MultiplatformとCompose Multiplatformを使い、AndroidとiOSの両方で同じCompose画面に `hmc` と表示する。オーナーは両OSの起動処理から共通画面までコードをたどり、それぞれの技術が何を担うかを学ぶ。（参照：[プロジェクト憲章](../project-charter.md)）
 
 プロジェクトはテンプレートから作成し、IDEにはAndroid Studioを使う。AndroidのアプリIDとiOSのBundle IDには `blue.lions.hmc` を使う。動作確認には用意済みのAndroid 17エミュレータとiOS 27.2シミュレータを使う。実機での動作確認、対局成績の機能、GitHub Actionsの設定は対象外とする。
 
@@ -36,7 +36,7 @@ Kotlin MultiplatformとCompose Multiplatformを使い、AndroidとiOSの両方�
 
 ### 2. 初期画面の仕様・設計・テスト項目を決める
 
-そらは `docs/specs/` に初期画面の仕様、設計、テスト項目をまとめ、手順書からリンクする。共通画面を置く場所、各OSからの呼び出し方、テンプレートから削除するサンプルは、手順1で採用するテンプレートの構成を見て決める。[初期画面の仕様・設計・テスト項目](../specs/initial-screen.md)
+そらは `docs/specs/` に初期画面の仕様、設計、テスト項目をまとめ、手順書からリンクする。共通画面を置く場所、各OSからの呼び出し方、テンプレートから削除するサンプルは、手順1で採用するテンプレートの構成を見て決める。（参照：[初期画面の仕様・設計・テスト項目](../specs/initial-screen.md)）
 
 今回は固定の文字列の表示が対象で、用意済みのエミュレータとシミュレータで起動と表示を確認できるため、準備に時間のかからない手動テストを選ぶ。テスト項目には起動手順、期待する表示、アプリの識別子を確認する方法を書く。テスト項目は実装前に決め、手動テストは実装後に手順4で実行する。
 
@@ -64,22 +64,22 @@ Android 17エミュレータとiOS 27.2シミュレータのどちらでも `hmc
 
 ### 草稿のレビュー
 
-うみの指摘３件を二人で採用した。
+うみの指摘3件を二人で採用した。
 
 - 手動テストを選ぶ理由と実行時期を明記した。テスト方法と、実装前にテスト項目を合意する手順を確認できるようにするため。
 - そらが仕様・設計・テスト項目を検証する方法と、仕様文書へのリンクを追加する手順を明記した。完了条件に対応する確認方法をたどれるようにするため。
 - 残す生成ファイルの扱いを採用案に含めた。改変して使う場合も含め、適用するライセンスと引き継ぐ表示を実装前に確認するため。
 
-うみの再レビューで３件とも解消した。追加の指摘はなかった。
+うみの再レビューで3件とも解消した。追加の指摘はなかった。
 
 ### 手順1の作業記録
 
 #### テンプレートの候補
 
-- JetBrainsのKotlin Multiplatform Wizardでは、Gradleを使い、AndroidとiOSでCompose UIを共有するプロジェクトを生成できる。サンプルテストを外した調査用のZIPには `androidApp/`、`iosApp/`、共通画面を含む `shared/` があった。改変して再配布できることを示す、生成物全体のライセンス表示はZIPとAPI資料から確認できなかった。[Wizard API](https://kmp.jetbrains.com/SKILL.md)・[JetBrainsのサイト利用規約](https://www.jetbrains.com/legal/docs/company/useterms/)
-- 公開テンプレートの `Kotlin/KMP-App-Template` は同じ３つのディレクトリを持ち、ルートにApache-2.0のライセンスがある。採用するなら、調査したコミット `6b6d09e4f3f5e845116422d59b658791ed6149c6` を出典とする。デスクトップ・Web、博物館のサンプルとその依存関係、テンプレート側のGitHub Actionsを除き、Android・iOSの起動処理と共通モジュールの構成を使う案とする。[KMPの標準構成](https://blog.jetbrains.com/kotlin/2026/05/new-kmp-default-structure/)・[公開テンプレート](https://github.com/Kotlin/KMP-App-Template/tree/6b6d09e4f3f5e845116422d59b658791ed6149c6)・[ライセンス](https://github.com/Kotlin/KMP-App-Template/blob/6b6d09e4f3f5e845116422d59b658791ed6149c6/LICENSE)
+- JetBrainsのKotlin Multiplatform Wizardでは、Gradleを使い、AndroidとiOSでCompose UIを共有するプロジェクトを生成できる。サンプルテストを外した調査用のZIPには `androidApp/`、`iosApp/`、共通画面を含む `shared/` があった。改変して再配布できることを示す、生成物全体のライセンス表示はZIPとAPI資料から確認できなかった。（参照：[Wizard API](https://kmp.jetbrains.com/SKILL.md)・[JetBrainsのサイト利用規約](https://www.jetbrains.com/legal/docs/company/useterms/)）
+- 公開テンプレートの `Kotlin/KMP-App-Template` は同じ3つのディレクトリを持ち、ルートにApache-2.0のライセンスがある。採用するなら、調査したコミット `6b6d09e4f3f5e845116422d59b658791ed6149c6` を出典とする。デスクトップ・Web、博物館のサンプルとその依存関係、テンプレート側のGitHub Actionsを除き、Android・iOSの起動処理と共通モジュールの構成を使う案とする。（参照：[KMPの標準構成](https://blog.jetbrains.com/kotlin/2026/05/new-kmp-default-structure/)・[公開テンプレート](https://github.com/Kotlin/KMP-App-Template/tree/6b6d09e4f3f5e845116422d59b658791ed6149c6)・[ライセンス](https://github.com/Kotlin/KMP-App-Template/blob/6b6d09e4f3f5e845116422d59b658791ed6149c6/LICENSE)）
 
-再配布の根拠をファイルの出典までたどれるため、公開テンプレートを採用する案とする。取り込むファイルと表示の案は次のとおり。改変したファイルには変更した旨を記し、上流の出典と既存の表示を残す。コメントを書けないファイルは、パスと出典を第三者の表示として文書に記録する。hmcが新規に書くファイルには手順書0001で定めた表示を入れる。[Apache-2.0第4条](https://www.apache.org/licenses/LICENSE-2.0)・[hmcのNOTICE](../../NOTICE)
+再配布の根拠をファイルの出典までたどれるため、公開テンプレートを採用する案とする。取り込むファイルと表示の案は次のとおり。改変したファイルには変更した旨を記し、上流の出典と既存の表示を残す。コメントを書けないファイルは、パスと出典を第三者の表示として文書に記録する。hmcが新規に書くファイルには手順書0001で定めた表示を入れる。（参照：[Apache-2.0第4条](https://www.apache.org/licenses/LICENSE-2.0)・[hmcのNOTICE](../../NOTICE)）
 
 | 取り込み候補 | 出典と扱い |
 | --- | --- |
@@ -94,24 +94,24 @@ Android 17エミュレータとiOS 27.2シミュレータのどちらでも `hmc
 
 #### ツールの組み合わせと試験ビルド
 
-手元にはAndroid Studio Rabbit 2系、Kotlin Multiplatformプラグイン `262.10968.183-AS`、Xcode 27.2（27B52）、Android SDK 37.0、Android 17のエミュレータ（API 37.2）があった。Xcodeが選ぶiOSシミュレータ用SDKは27.2だった。[Android Studioのリリース情報](https://developer.android.com/studio/releases/fixed-bugs/studio/2026.2.2)・[Kotlin Multiplatformプラグイン](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)
+手元にはAndroid Studio Rabbit 2系、Kotlin Multiplatformプラグイン `262.10968.183-AS`、Xcode 27.2（27B52）、Android SDK 37.0、Android 17のエミュレータ（API 37.2）があった。Xcodeが選ぶiOSシミュレータ用SDKは27.2だった。（参照：[Android Studioのリリース情報](https://developer.android.com/studio/releases/fixed-bugs/studio/2026.2.2)・[Kotlin Multiplatformプラグイン](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform)）
 
-2026年11月17日に取得したWizardの生成例は、KotlinとCompose Compilerプラグインが2.4.21、Compose Multiplatformが1.12.2、Gradleが9.5.1、Android Gradle Pluginが9.1.1で、Androidの `compileSdk` と `targetSdk` は37だった。この組み合わせを初期構成の案とする。AGP 9.1.1が必要とするのはGradle 9.3.1以上とJDK 17以上で、AGPがサポートするAndroid APIは37.0まで。JDK 25はGradle 9.1.0以降でGradleの実行に使える。Gradle配布ZIPの設定値とWrapper JARのSHA-256はGradleの公開値に一致した。[Kotlinの互換表](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html)・[Compose Multiplatform 1.12.2](https://github.com/JetBrains/compose-multiplatform/releases/tag/v1.12.2)・[AGP 9.1.1](https://developer.android.com/build/releases/agp-9-1-0-release-notes)・[Gradleの互換表](https://docs.gradle.org/current/userguide/compatibility.html)・[Gradleのチェックサム](https://gradle.org/release-checksums/)
+2026年11月17日に取得したWizardの生成例は、KotlinとCompose Compilerプラグインが2.4.21、Compose Multiplatformが1.12.2、Gradleが9.5.1、Android Gradle Pluginが9.1.1で、Androidの `compileSdk` と `targetSdk` は37だった。この組み合わせを初期構成の案とする。AGP 9.1.1が必要とするのはGradle 9.3.1以上とJDK 17以上で、AGPがサポートするAndroid APIは37.0まで。JDK 25はGradle 9.1.0以降でGradleの実行に使える。Gradle配布ZIPの設定値とWrapper JARのSHA-256はGradleの公開値に一致した。（参照：[Kotlinの互換表](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html)・[Compose Multiplatform 1.12.2](https://github.com/JetBrains/compose-multiplatform/releases/tag/v1.12.2)・[AGP 9.1.1](https://developer.android.com/build/releases/agp-9-1-0-release-notes)・[Gradleの互換表](https://docs.gradle.org/current/userguide/compatibility.html)・[Gradleのチェックサム](https://gradle.org/release-checksums/)）
 
-Wizardが生成した `gradle/gradle-daemon-jvm.properties` はAzulのJDK 21を指定していた。この設定はGradleデーモンのJDK選択で `JAVA_HOME` より優先される。調査用のプロジェクトでは `toolchainVersion=25` のみを指定し、ベンダーとダウンロード先の指定を外した。開発に使うJDKは次の２案を比較した。[Androidビルドで使うJDK](https://developer.android.com/build/jdks)・[GradleデーモンのJVM選択](https://docs.gradle.org/current/userguide/gradle_daemon.html)
+Wizardが生成した `gradle/gradle-daemon-jvm.properties` はAzulのJDK 21を指定していた。この設定はGradleデーモンのJDK選択で `JAVA_HOME` より優先される。調査用のプロジェクトでは `toolchainVersion=25` のみを指定し、ベンダーとダウンロード先の指定を外した。開発に使うJDKは次の2案を比較した。（参照：[Androidビルドで使うJDK](https://developer.android.com/build/jdks)・[GradleデーモンのJVM選択](https://docs.gradle.org/current/userguide/gradle_daemon.html)）
 
 | Gradleに使うJDK | 手元のバージョン | 選ぶ理由 |
 | --- | --- | --- |
 | Android Studio同梱のJBR | 25.0.4 | IDEと一緒に入っており、ローカルのセットアップを減らせる。 |
 | SDKMANで導入するTemurin | `25.0.4-tem` | IDEの更新と独立してバージョンを指定できる。調査に使ったバージョンは導入済みだった。 |
 
-ターミナルでは選んだJDKのディレクトリを `JAVA_HOME` に指定する。Xcodeのビルドフェーズから呼ぶ `gradlew` にもこの値が渡るよう、ターミナルから `JAVA_HOME` を指定して `xcodebuild` を実行する。[Androidビルドで使うJDK](https://developer.android.com/build/jdks)
+ターミナルでは選んだJDKのディレクトリを `JAVA_HOME` に指定する。Xcodeのビルドフェーズから呼ぶ `gradlew` にもこの値が渡るよう、ターミナルから `JAVA_HOME` を指定して `xcodebuild` を実行する。（参照：[Androidビルドで使うJDK](https://developer.android.com/build/jdks)）
 
-Android StudioでDaemon JVM criteriaを使うプロジェクトでは、その条件が従来のGradle JDK設定に代わる。今回の試験ではIDEでのJDKの選択方法は未確認のため、手順3でGradle同期に使われるJDKを確かめる。[Android Studioのリリースノート](https://developer.android.com/studio/releases/past-releases/as-panda-1-release-notes#gradle_daemon_jvm_criteria)
+Android StudioでDaemon JVM criteriaを使うプロジェクトでは、その条件が従来のGradle JDK設定に代わる。今回の試験ではIDEでのJDKの選択方法は未確認のため、手順3でGradle同期に使われるJDKを確かめる。（参照：[Android Studioのリリースノート](https://developer.android.com/studio/releases/past-releases/as-panda-1-release-notes#gradle_daemon_jvm_criteria)）
 
-両方のJDKが `toolchainVersion=25` を満たすため、`JAVA_HOME` を変えてもGradleは切り替え前のデーモンを再利用することがある。切り替えるときはビルドが終わってから、ビルドに使ったGradleユーザーホームで `./gradlew --stop` を実行する。JDKごとにGradleユーザーホームを用意する方法でも切り替えられる。切り替え後の最初のビルドではデーモンの起動ログを読み、`javaHome` と `javaVendor` が選んだJDKと一致することを確認する。[Gradleデーモンの停止とログ](https://docs.gradle.org/current/userguide/gradle_daemon.html)・[Gradle 9.5.1の再利用条件](https://github.com/gradle/gradle/blob/v9.5.1/platforms/core-runtime/daemon-protocol/src/main/java/org/gradle/launcher/daemon/context/DaemonCompatibilitySpec.java#L61)
+両方のJDKが `toolchainVersion=25` を満たすため、`JAVA_HOME` を変えてもGradleは切り替え前のデーモンを再利用することがある。切り替えるときはビルドが終わってから、ビルドに使ったGradleユーザーホームで `./gradlew --stop` を実行する。JDKごとにGradleユーザーホームを用意する方法でも切り替えられる。切り替え後の最初のビルドではデーモンの起動ログを読み、`javaHome` と `javaVendor` が選んだJDKと一致することを確認する。（参照：[Gradleデーモンの停止とログ](https://docs.gradle.org/current/userguide/gradle_daemon.html)・[Gradle 9.5.1の再利用条件](https://github.com/gradle/gradle/blob/v9.5.1/platforms/core-runtime/daemon-protocol/src/main/java/org/gradle/launcher/daemon/context/DaemonCompatibilitySpec.java#L61)）
 
-Kotlin 2.4.21の互換表に記載されているXcodeは26.4だった。手元の27.2での組み合わせを確認するため、リポジトリ外のWizard生成例で、Androidの `:androidApp:assembleDebug` と、XcodeのiOSシミュレータ向けDebugビルドを試した。[Kotlinの互換表](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html)
+Kotlin 2.4.21の互換表に記載されているXcodeは26.4だった。手元の27.2での組み合わせを確認するため、リポジトリ外のWizard生成例で、Androidの `:androidApp:assembleDebug` と、XcodeのiOSシミュレータ向けDebugビルドを試した。（参照：[Kotlinの互換表](https://kotlinlang.org/docs/multiplatform/multiplatform-compatibility-guide.html)）
 
 試験ではJDKごとにGradleユーザーホームを分け、各ビルドで使ったJDKをデーモンの起動ログで確認した。TemurinでAndroidのビルドに成功し、58タスクが実行された。続いて同じ試験プロジェクトでJBRを使い、AndroidのビルドとiOSシミュレータ向けのKotlinフレームワークのリンクに成功した。両方を合わせた集計では7タスクが実行され、56タスクが `UP-TO-DATE` だった。JBRでのAndroidビルドではTemurinで作った成果物を再利用した。
 
@@ -123,16 +123,16 @@ Xcode 27.2では両方のJDKでiOSシミュレータ向けのアプリを生成�
 
 開発時にGradleを動かすJDKは、Android Studio同梱のJBR 25を標準とする。開発に使うIDEと一緒に用意でき、環境の準備が少なくて済むためである。Gradleデーモンの条件には `toolchainVersion=25` のみを指定する。
 
-Android Studioの更新で同梱JBRがJava 25の範囲でパッチ更新された場合は、更新後のJBRを使う。同梱JBRのJavaが新しいメジャーバージョンに切り替わった場合は、hmcのJDKを更新するまでSDKMANで導入したTemurin 25を使う。hmcで使うJavaのメジャーバージョンを上げるときは、Gradleとプラグインの互換性を確認し、両OS向けのビルドに成功してから切り替える。[GradleのJava互換表](https://docs.gradle.org/current/userguide/compatibility.html#java_runtime)
+Android Studioの更新で同梱JBRがJava 25の範囲でパッチ更新された場合は、更新後のJBRを使う。同梱JBRのJavaが新しいメジャーバージョンに切り替わった場合は、hmcのJDKを更新するまでSDKMANで導入したTemurin 25を使う。hmcで使うJavaのメジャーバージョンを上げるときは、Gradleとプラグインの互換性を確認し、両OS向けのビルドに成功してから切り替える。（参照：[GradleのJava互換表](https://docs.gradle.org/current/userguide/compatibility.html#java_runtime)）
 
 GitHub ActionsでCI環境を作るときにADRが必要かを改めて検討する。
 
 #### 手順1の独立レビュー
 
-うみの指摘３件を二人で採用した。
+うみの指摘3件を二人で採用した。
 
 - 省く画像やアセットカタログの参照を削除する箇所を記した。取り込む設定に参照切れが残らないようにするため。
-- ２つのJDKを切り替える手順と、デーモンで使ったJDKの確認方法を記した。切り替え前のデーモンを再利用する場合があるため。
+- 2つのJDKを切り替える手順と、デーモンで使ったJDKの確認方法を記した。切り替え前のデーモンを再利用する場合があるため。
 - JBRの試験でAndroidの成果物を再利用したことと、各試験の実行条件を記した。試験で確かめた範囲を明確にするため。
 
 再レビューでは、Android StudioでのJDKの指定方法について指摘があった。二人で採用し、ターミナルでの試験結果とIDEで未確認の内容を明記した。手順3にGradle同期時のJDKの確認を加えた。
@@ -154,7 +154,7 @@ Android StudioとKotlin Multiplatformプラグイン、Xcode、Android SDKは調
 - 仕様と両OSの表示テストに `hmc` だけを表示することを明記した。テンプレートのボタンや別の文字が残っていた場合にテストで確認できるようにするため。
 - Android SDK内の `apkanalyzer` の場所を追記した。`PATH` から見つからない環境でも実行できるようにするため。
 
-再レビューで、うみは２件とも対応済みであることを確認した。追加の指摘はなかった。
+再レビューで、うみは2件とも対応済みであることを確認した。追加の指摘はなかった。
 
 #### 手順2の検証結果
 
@@ -162,9 +162,9 @@ Android StudioとKotlin Multiplatformプラグイン、Xcode、Android SDKは調
 
 ### 手順3の作業記録
 
-`androidApp` の `MainActivity` と `iosApp` のSwiftUIの起動処理を、`shared` の共通画面 `App()` につないだ。博物館のサンプルと依存関係、画像・アイコン、デスクトップとWebのモジュールを取り込み範囲から外した。テンプレート由来のテキストファイルに出典を示し、改変したファイルに変更した旨を記した。Gradle WrapperのスクリプトとJARの出典およびJARのSHA-256は `NOTICE` に記録した。JARのSHA-256と、配布ZIPに指定したSHA-256はGradle 9.5.1の公開値と一致した。[NOTICE](../../NOTICE)・[Gradleのチェックサム](https://gradle.org/release-checksums/)
+`androidApp` の `MainActivity` と `iosApp` のSwiftUIの起動処理を、`shared` の共通画面 `App()` につないだ。博物館のサンプルと依存関係、画像・アイコン、デスクトップとWebのモジュールを取り込み範囲から外した。テンプレート由来のテキストファイルに出典を示し、改変したファイルに変更した旨を記した。Gradle WrapperのスクリプトとJARの出典およびJARのSHA-256は `NOTICE` に記録した。JARのSHA-256と、配布ZIPに指定したSHA-256はGradle 9.5.1の公開値と一致した。（参照：[NOTICE](../../NOTICE)・[Gradleのチェックサム](https://gradle.org/release-checksums/)）
 
-Androidの起動処理で使うCompose Runtimeを `androidApp` の依存関係に加え、共通モジュールと同じバージョンに揃えた。共通モジュールのAndroidターゲットには、AGP 9.1.1で使用できる `android` ブロックを使った。[AndroidのKMPライブラリプラグイン](https://developer.android.com/kotlin/multiplatform/plugin)
+Androidの起動処理で使うCompose Runtimeを `androidApp` の依存関係に加え、共通モジュールと同じバージョンに揃えた。共通モジュールのAndroidターゲットには、AGP 9.1.1で使用できる `android` ブロックを使った。（参照：[AndroidのKMPライブラリプラグイン](https://developer.android.com/kotlin/multiplatform/plugin)）
 
 最初のXcodeビルドで汎用のシミュレータを指定したところ、XcodeはGradleに `x86_64` 向けのフレームワークも要求した。共通モジュールのiOSシミュレータ向けターゲットに合わせ、Xcodeのシミュレータ向け設定から `x86_64` を除外した。
 
@@ -182,12 +182,12 @@ AndroidはJBR 25.0.4で `:androidApp:assembleDebug` に成功した。iOSは同�
 
 #### テスト結果
 
-コミット `443f92e` に含まれる実装を、手順3で生成した両OSのDebugビルドで確認した。[初期画面のテスト項目](../specs/initial-screen.md#テスト項目)
+コミット `443f92e` に含まれる実装を、手順3で生成した両OSのDebugビルドで確認した。（参照：[初期画面のテスト項目](../specs/initial-screen.md#テスト項目)）
 
 | 項目 | 確認結果 |
 | --- | --- |
-| Androidの起動と表示 | Android 17のPixel 10aエミュレータにAPKをインストールした。ランチャーのアプリ一覧に表示された `hmc` を起動し、アプリの表示領域の中央に小文字の `hmc` だけが１行で表示されることを確認した。 |
-| iOSの起動と表示 | iOS 27.2のiPhone 18 Proシミュレータに `.app` をインストールした。ホーム画面に表示された `hmc` を起動し、アプリの表示領域の中央に小文字の `hmc` だけが１行で表示されることを確認した。 |
+| Androidの起動と表示 | Android 17のPixel 10aエミュレータにAPKをインストールした。ランチャーのアプリ一覧に表示された `hmc` を起動し、アプリの表示領域の中央に小文字の `hmc` だけが1行で表示されることを確認した。 |
+| iOSの起動と表示 | iOS 27.2のiPhone 18 Proシミュレータに `.app` をインストールした。ホーム画面に表示された `hmc` を起動し、アプリの表示領域の中央に小文字の `hmc` だけが1行で表示されることを確認した。 |
 | Androidの設定 | 起動に使ったAPKを `apkanalyzer` で調べ、アプリIDが `blue.lions.hmc`、最低APIレベルが24であることを確認した。 |
 | iOSの設定 | 起動に使った `.app` の `Info.plist` を `plutil` で読み、Bundle IDが `blue.lions.hmc`、最低対応OSが18.5であることを確認した。 |
 | 共通画面の呼び出しとスタイル | Androidの `MainActivity` とiOSの `iOSApp` からコードをたどり、どちらも `shared` の同じ `App()` を呼ぶことを確認した。`MaterialTheme` の標準設定で `Text` と `Surface` が文字と背景を描画する。 |
