@@ -3,5 +3,11 @@
 // Modified for hmc (https://github.com/7pairs/hmc).
 
 TEAM_ID=
+
+// For Debug builds on an iPhone, create Local.xcconfig in this directory and set:
+// TEAM_ID[config=Debug][sdk=iphoneos*] = YOUR_TEAM_ID
+// See docs/procedures/0007-configure-ios-device-signing.md for setup and verification.
+#include? "Local.xcconfig"
+
 BUNDLE_ID=blue.lions.hmc
 APP_NAME=hmc
