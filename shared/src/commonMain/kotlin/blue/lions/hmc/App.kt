@@ -6,6 +6,7 @@ package blue.lions.hmc
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,10 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,15 +63,23 @@ private val scoreInputTransformation = InputTransformation {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ScoreEntryScreen() {
-    val scoreFields = scorePlayerNames.map { rememberTextFieldState() }
+    val scoreFields = scoreSeatNames.map { rememberTextFieldState() }
+    var players by rememberSaveable {
+        mutableStateOf(ArrayList(List<String?>(scoreSeatNames.size) { null }))
+    }
+    var editedPlayers by rememberSaveable {
+        mutableStateOf(ArrayList(List(scoreSeatNames.size) { false }))
+    }
     // Restoring the last submitted inputs is enough to reconstruct their confirmation result.
     var confirmedInputs by rememberSaveable { mutableStateOf<ArrayList<String>?>(null) }
-    val confirmation = remember(confirmedInputs) {
-        confirmedInputs?.let(::confirmScores) ?: ScoreConfirmation()
+    var confirmedPlayers by rememberSaveable { mutableStateOf<ArrayList<String?>>(arrayListOf()) }
+    val confirmation = remember(confirmedInputs, confirmedPlayers) {
+        confirmedInputs?.let { confirmScores(it, confirmedPlayers) } ?: ScoreConfirmation()
     }
-    val visibleConfirmation = confirmation.afterEdits(scoreFields.map { field ->
-        field.undoState.canUndo || field.undoState.canRedo
-    })
+    val visibleConfirmation = confirmation.afterEdits(
+        editedScores = scoreFields.map { it.undoState.canUndo || it.undoState.canRedo },
+        editedPlayers = editedPlayers,
+    )
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -83,23 +95,44 @@ private fun ScoreEntryScreen() {
 
         scoreFields.forEachIndexed { index, field ->
             val error = visibleConfirmation.fieldErrors[index]
-            OutlinedTextField(
-                state = field,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("${scorePlayerNames[index]}の素点（点）") },
-                supportingText = if (error == null) null else {
-                    { Text(error) }
-                },
-                isError = error != null,
-                inputTransformation = scoreInputTransformation,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberSigned),
-                lineLimits = TextFieldLineLimits.SingleLine,
-            )
+            Column {
+                Text(scoreSeatNames[index], style = MaterialTheme.typography.titleMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    PlayerSelector(
+                        player = players[index],
+                        error = visibleConfirmation.playerErrors[index],
+                        modifier = Modifier.weight(1f),
+                        onSelect = { player ->
+                            val updatedPlayers = assignPlayer(players, index, player)
+                            if (updatedPlayers != players) {
+                                editedPlayers = players.mapIndexedTo(ArrayList()) { seat, previousPlayer ->
+                                    editedPlayers[seat] || previousPlayer != updatedPlayers[seat]
+                                }
+                                players = ArrayList(updatedPlayers)
+                            }
+                        },
+                    )
+                    OutlinedTextField(
+                        state = field,
+                        modifier = Modifier.weight(1f),
+                        label = { Text("素点（点）") },
+                        supportingText = if (error == null) null else {
+                            { Text(error) }
+                        },
+                        isError = error != null,
+                        inputTransformation = scoreInputTransformation,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberSigned),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                    )
+                }
+            }
         }
 
         Button(onClick = {
             focusManager.clearFocus()
             confirmedInputs = scoreFields.mapTo(ArrayList()) { it.text.toString() }
+            confirmedPlayers = players
+            editedPlayers = ArrayList(List(scoreSeatNames.size) { false })
             scoreFields.forEach { it.undoState.clearHistory() }
         }) {
             Text("成績を確認")
@@ -110,13 +143,13 @@ private fun ScoreEntryScreen() {
         }
         if (visibleConfirmation.rows.isNotEmpty()) {
             Text("半荘の成績", style = MaterialTheme.typography.titleLarge)
-            visibleConfirmation.rows.forEach { result ->
+            visibleConfirmation.rows.forEachIndexed { index, result ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(result.name, style = MaterialTheme.typography.titleMedium)
+                        Text("${scoreSeatNames[index]} ${result.name}", style = MaterialTheme.typography.titleMedium)
                         Text("${result.score} 点")
                     }
                     Column(modifier = Modifier.weight(1f)) {
@@ -125,6 +158,37 @@ private fun ScoreEntryScreen() {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PlayerSelector(
+    player: String?,
+    error: String?,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(modifier) {
+        Box {
+            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(player?.let(scorePlayerNames::getValue) ?: "選手を選ぶ")
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                scorePlayerNames.forEach { (id, name) ->
+                    DropdownMenuItem(
+                        text = { Text(name) },
+                        onClick = {
+                            expanded = false
+                            onSelect(id)
+                        },
+                    )
+                }
+            }
+        }
+        if (error != null) {
+            Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

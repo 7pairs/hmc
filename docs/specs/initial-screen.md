@@ -8,7 +8,7 @@ Source: https://github.com/7pairs/hmc
 
 ## 仕様
 
-AndroidとiOSでアプリを新しく起動すると、共通の素点入力画面を表示する。「選手A」から「選手D」までを固定順に並べ、4人の素点欄は空欄で始める。ホーム画面などでOSが表示するアプリ名は `hmc` とする。（参照：[素点入力と成績表示の仕様](match-score-entry.md#仕様)）
+AndroidとiOSでアプリを新しく起動すると、共通の素点入力画面を表示する。東・南・西・北の順に4席を並べ、各席は選手未選択、素点空欄で始める。ホーム画面などでOSが表示するアプリ名は `hmc` とする。（参照：[素点入力と成績表示の仕様](match-score-entry.md#仕様)）
 
 | 項目 | Android | iOS |
 | --- | --- | --- |
@@ -34,14 +34,14 @@ iOSは `iosApp/Configuration/Config.xcconfig` の `BUNDLE_ID` を `blue.lions.hm
 
 ## テスト項目
 
-同じソースのDebugビルドを両OSで起動し、アプリ名と最初に表示される画面を確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。素点入力画面での操作は手順書0005の手順3で確かめる。（参照：[素点入力と成績表示のテスト項目](match-score-entry.md#androidとiosでの画面確認)）
+同じソースのDebugビルドを両OSで起動し、アプリ名と最初に表示される画面を確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。選手の割り当てと素点入力画面での操作は手順書0008の手順3で確かめる。（参照：[素点入力と成績表示のテスト項目](match-score-entry.md#androidとiosでの画面確認)・[手順書0008](../procedures/0008-assign-players-to-seats.md)）
 
 `apkanalyzer` が `PATH` にない場合は、Android SDK内の `cmdline-tools/latest/bin/apkanalyzer` を使う。
 
 | 項目 | 確認方法 | 期待する結果 |
 | --- | --- | --- |
-| Androidの起動と表示 | Debug APKをインストールし、ランチャーに表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。新しく起動すると4人の素点欄が空欄の素点入力画面を表示する。 |
-| iOSの起動と表示 | Debugビルドをインストールし、ホーム画面に表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。新しく起動すると4人の素点欄が空欄の素点入力画面を表示する。 |
+| Androidの起動と表示 | Debug APKをインストールし、ランチャーに表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。東・南・西・北の各席が選手未選択、素点空欄で表示される。 |
+| iOSの起動と表示 | Debugビルドをインストールし、ホーム画面に表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。東・南・西・北の各席が選手未選択、素点空欄で表示される。 |
 | Androidの設定 | `apkanalyzer manifest application-id <APK>` と `apkanalyzer manifest min-sdk <APK>` で、起動に使うAPKを確認する。（参照：[APK Analyzerのコマンド](https://developer.android.com/tools/apkanalyzer)） | アプリIDは `blue.lions.hmc`、最低APIレベルは24。 |
 | iOSの設定 | 起動に使う `.app` 内の `Info.plist` から `CFBundleIdentifier` と `MinimumOSVersion` を読む。`plutil -extract <キー> raw -o - <Info.plist>` を使う。 | Bundle IDは `blue.lions.hmc`、最低対応OSは18.5。 |
 | 共通画面の呼び出しとスタイル | 設計に示したAndroidとiOSの起動経路をコードでたどり、共通画面のスタイルを確認する。 | どちらの経路も `shared/src/commonMain` の同じ `App()` を呼び出し、Material 3の標準テーマを適用した素点入力画面を表示する。 |

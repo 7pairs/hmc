@@ -6,7 +6,8 @@ package blue.lions.hmc
 
 import kotlin.math.abs
 
-internal val scorePlayerNames = listOf("選手A", "選手B", "選手C", "選手D")
+internal val scoreSeatNames = listOf("東", "南", "西", "北")
+internal val scorePlayerNames = mapOf("A" to "Aさん", "B" to "Bさん", "C" to "Cさん", "D" to "Dさん")
 
 private val scoreInputPattern = Regex("-?[0-9]*")
 private val mLeaguePoints = PlacementPoints(50, 10, -10, -30)
@@ -19,32 +20,57 @@ internal data class ScoreResultRow(
 )
 
 internal data class ScoreConfirmation(
-    val fieldErrors: List<String?> = List(scorePlayerNames.size) { null },
+    val fieldErrors: List<String?> = List(scoreSeatNames.size) { null },
     val calculationError: String? = null,
     val rows: List<ScoreResultRow> = emptyList(),
+    val playerErrors: List<String?> = List(scoreSeatNames.size) { null },
 ) {
-    fun afterEdits(editedFields: List<Boolean>): ScoreConfirmation {
-        if (editedFields.none { it }) return this
+    fun afterEdits(
+        editedScores: List<Boolean>,
+        editedPlayers: List<Boolean>,
+    ): ScoreConfirmation {
+        val scoresChanged = editedScores.any { it }
+        val playersChanged = editedPlayers.any { it }
+        if (!scoresChanged && !playersChanged) return this
 
-        return ScoreConfirmation(fieldErrors = fieldErrors.mapIndexed { index, error ->
-            error.takeUnless { editedFields[index] }
-        })
+        return ScoreConfirmation(
+            fieldErrors = fieldErrors.mapIndexed { index, error -> error.takeUnless { editedScores[index] } },
+            calculationError = calculationError.takeUnless { scoresChanged },
+            playerErrors = playerErrors.mapIndexed { index, error -> error.takeUnless { editedPlayers[index] } },
+        )
     }
 }
 
 internal fun isScoreInput(text: CharSequence): Boolean = scoreInputPattern.matches(text)
 
-internal fun confirmScores(inputs: List<String>): ScoreConfirmation {
-    val parsedScores = inputs.map(String::toIntOrNull)
-    if (parsedScores.any { it == null }) {
-        val errors = inputs.mapIndexed { index, input ->
-            when {
-                input.isEmpty() -> "素点を入力してください。"
-                parsedScores[index] == null -> "素点を点単位の整数で入力してください。"
-                else -> null
-            }
+internal fun assignPlayer(players: List<String?>, seat: Int, player: String): List<String?> {
+    if (players[seat] == player) return players
+    val previousSeat = players.indexOf(player)
+    return players.toMutableList().apply {
+        if (previousSeat >= 0) this[previousSeat] = players[seat]
+        this[seat] = player
+    }
+}
+
+internal fun confirmScores(inputs: List<String>, players: List<String?>): ScoreConfirmation {
+    val playerCounts = players.filterNotNull().groupingBy { it }.eachCount()
+    val playerErrors = players.map { player ->
+        when {
+            player == null -> "選手を選んでください。"
+            playerCounts.getValue(player) > 1 -> "同じ選手が複数の席に割り当てられています。"
+            else -> null
         }
-        return ScoreConfirmation(fieldErrors = errors)
+    }
+    val parsedScores = inputs.map(String::toIntOrNull)
+    val fieldErrors = inputs.mapIndexed { index, input ->
+        when {
+            input.isEmpty() -> "素点を入力してください。"
+            parsedScores[index] == null -> "素点を点単位の整数で入力してください。"
+            else -> null
+        }
+    }
+    if (playerErrors.any { it != null } || fieldErrors.any { it != null }) {
+        return ScoreConfirmation(fieldErrors = fieldErrors, playerErrors = playerErrors)
     }
 
     val scores = parsedScores.filterNotNull()
@@ -53,7 +79,7 @@ internal fun confirmScores(inputs: List<String>): ScoreConfirmation {
         is MatchResult.Failure -> ScoreConfirmation(calculationError = result.reason.message())
         is MatchResult.Success -> ScoreConfirmation(rows = result.players.mapIndexed { index, player ->
             ScoreResultRow(
-                name = scorePlayerNames[index],
+                name = scorePlayerNames.getValue(checkNotNull(players[index])),
                 score = formatScore(scores[index].toLong()),
                 place = player.place,
                 points = formatPoints(player.pointsInTenths),
