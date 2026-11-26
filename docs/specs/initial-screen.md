@@ -25,12 +25,14 @@ iOSの最低対応バージョンは、手順書0002の試験ビルドで一部�
 
 ## 設計
 
-手順書0002で採用したテンプレートの `androidApp`、`iosApp`、`shared` の構成を使う。`shared/src/commonMain/kotlin/blue/lions/hmc/App.kt` の `App()` でCompose Material 3の標準テーマを適用し、`Surface` の中で `ScoreEntryScreen()` を表示する。（参照：[素点入力と成績表示の設計](match-score-entry.md#設計)）
+手順書0002で採用した `androidApp`、`iosApp`、`shared` の構成を使う。共通の `App()` で登録済みの選手を読み込み、人数に応じて選手登録画面か素点入力画面を表示する。読み込みに失敗したときは理由と再試行の操作を表示する。両画面にCompose Material 3の標準テーマを適用する。（参照：[素点入力と成績表示の設計](match-score-entry.md#設計)）
 
 | OS | 起動処理から共通画面を呼ぶ経路 |
 | --- | --- |
-| Android | `androidApp` のManifestで起動する `MainActivity` が、`setContent` から `shared` の `App()` を呼ぶ。 |
-| iOS | `iosApp` の `iOSApp.swift` が `ContentView` を開く。`ContentView.swift` の `ComposeView` が `Shared` フレームワークの `MainViewController()` を呼び出し、`shared/src/iosMain/kotlin/blue/lions/hmc/MainViewController.kt` の `ComposeUIViewController` が `App()` を表示する。 |
+| Android | `Application` が `AppContainer` を持つ。`MainActivity` はそこから取得した依存をルートの `ViewModel` に渡し、その状態ホルダーを `setContent` から共通の `App()` に渡す。 |
+| iOS | `iOSApp.swift` で `@StateObject` として保持するオブジェクトが `AppContainer` と状態ホルダーを持つ。`ContentView` と `ComposeView` を経由して `MainViewController()` に渡し、`ComposeUIViewController` から共通の `App()` を表示する。 |
+
+状態ホルダーはRepositoryを通して選手一覧を読み込み、登録や改名が成功したら一覧を更新する。選手を追加する際は、選手と初期リーグへの所属を1トランザクションで保存する。改名は選手IDで対象を指定し、表示名だけを更新する。前後の空白を除いた表示名で空欄と別の選手との重複を検証する。登録や改名に失敗したら入力を保つ。（参照：[手動DIのADR](../adr/0003-use-manual-dependency-injection.md)・[保存データと制約](match-score-entry.md#保存するデータと制約)）
 
 Androidは `androidApp` のビルド設定で `applicationId`、Manifestが参照する `app_name` でアプリ名を設定する。Androidアプリと共通モジュールのAndroidターゲットで `minSdk` を24にする。
 
@@ -40,14 +42,14 @@ iOSは `iosApp/Configuration/Config.xcconfig` の `BUNDLE_ID` を `blue.lions.hm
 
 ## テスト項目
 
-同じソースのDebugビルドを両OSで起動し、アプリ名と最初に表示される画面を確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。選手の割り当てと素点入力画面での操作は手順書0008の手順3で確かめる。（参照：[素点入力と成績表示のテスト項目](match-score-entry.md#androidとiosでの画面確認)・[手順書0008](../procedures/0008-assign-players-to-seats.md)）
+同じソースのDebugビルドを両OSで起動し、アプリ名と最初に表示される画面を確認する。起動に使う成果物でアプリ識別子と最低対応OSも確認する。選手の割り当てと素点入力画面での操作は素点入力の画面確認で確かめる。（参照：[素点入力と成績表示のテスト項目](match-score-entry.md#androidとiosでの画面確認)）
 
 `apkanalyzer` が `PATH` にない場合は、Android SDK内の `cmdline-tools/latest/bin/apkanalyzer` を使う。
 
 | 項目 | 確認方法 | 期待する結果 |
 | --- | --- | --- |
-| Androidの起動と表示 | Debug APKをインストールし、ランチャーに表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。東・南・西・北の各席が選手未選択、素点空欄で表示される。 |
-| iOSの起動と表示 | Debugビルドをインストールし、ホーム画面に表示されたアプリ名を確認して起動する。 | アプリ名は `hmc`。東・南・西・北の各席が選手未選択、素点空欄で表示される。 |
+| 起動と表示 | 両OSでアプリ名を確認し、選手が0人、1〜3人、4人以上の状態でそれぞれ新しく起動する。 | アプリ名は `hmc`。4人未満では選手登録画面に登録済みの選手が表示される。4人以上では4席とも選手未選択、素点空欄の素点入力画面を開く。 |
+| 選手の追加と名前の変更 | 空欄と登録済みの名前を試し、入力を直して選手を追加する。4人登録後に素点入力へ進み、成績を確認する。登録画面を開き直して5人目を追加し、席に割り当てた選手の名前も変更してから素点入力に戻る。 | 不備の理由を表示する。有効な名前で登録・改名でき、5人全員が候補に出る。改名前と同じ選手IDで席と素点が残り、確認済みの成績には変更後の名前が表示される。 |
 | Androidの設定 | `apkanalyzer manifest application-id <APK>` と `apkanalyzer manifest min-sdk <APK>` で、起動に使うAPKを確認する。（参照：[APK Analyzerのコマンド](https://developer.android.com/tools/apkanalyzer)） | アプリIDは `blue.lions.hmc`、最低APIレベルは24。 |
 | iOSの設定 | 起動に使う `.app` 内の `Info.plist` から `CFBundleIdentifier` と `MinimumOSVersion` を読む。`plutil -extract <キー> raw -o - <Info.plist>` を使う。 | Bundle IDは `blue.lions.hmc`、最低対応OSは18.5。 |
-| 共通画面の呼び出しとスタイル | 設計に示したAndroidとiOSの起動経路をコードでたどり、共通画面のスタイルを確認する。 | どちらの経路も `shared/src/commonMain` の同じ `App()` を呼び出し、Material 3の標準テーマを適用した素点入力画面を表示する。 |
+| 共通画面の呼び出しとスタイル | 設計に示したAndroidとiOSの起動経路をコードでたどり、共通画面のスタイルを確認する。 | 両OSが共通の `App()` を呼び出し、選手登録画面と素点入力画面にMaterial 3の標準テーマを適用する。 |
