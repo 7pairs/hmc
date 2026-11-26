@@ -6,9 +6,17 @@ import SwiftUI
 
 @main
 struct iOSApp: App {
+    #if !(DEBUG && HMC_RECREATION_CHECK)
+    @StateObject private var owner = EntryOwner()
+    #endif
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            #if DEBUG && HMC_RECREATION_CHECK
+            RecreationCheckView()
+            #else
+            ContentView(owner: owner.kotlin)
+            #endif
         }
     }
 }

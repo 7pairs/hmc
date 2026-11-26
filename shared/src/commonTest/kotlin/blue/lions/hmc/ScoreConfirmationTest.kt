@@ -10,6 +10,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ScoreConfirmationTest {
+    private fun confirmScores(inputs: List<String>, players: List<String?>): ScoreConfirmation =
+        confirmScoreFields(inputs, players) ?: confirmValidScores(
+            inputs.map(String::toInt),
+            players,
+            listOf("A", "B", "C", "D").associateWith { "${it}さん" },
+            PlacementPoints(50, 10, -10, -30),
+        )
+
     private val scores = listOf("20100", "50000", "-1100", "31000")
     private val players = listOf("A", "B", "C", "D")
     private val noEdits = listOf(false, false, false, false)

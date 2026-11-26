@@ -7,10 +7,8 @@ package blue.lions.hmc
 import kotlin.math.abs
 
 internal val scoreSeatNames = listOf("東", "南", "西", "北")
-internal val scorePlayerNames = mapOf("A" to "Aさん", "B" to "Bさん", "C" to "Cさん", "D" to "Dさん")
 
 private val scoreInputPattern = Regex("-?[0-9]*")
-private val mLeaguePoints = PlacementPoints(50, 10, -10, -30)
 
 internal data class ScoreResultRow(
     val name: String,
@@ -52,7 +50,7 @@ internal fun assignPlayer(players: List<String?>, seat: Int, player: String): Li
     }
 }
 
-internal fun confirmScores(inputs: List<String>, players: List<String?>): ScoreConfirmation {
+internal fun confirmScoreFields(inputs: List<String>, players: List<String?>): ScoreConfirmation? {
     val playerCounts = players.filterNotNull().groupingBy { it }.eachCount()
     val playerErrors = players.map { player ->
         when {
@@ -61,11 +59,10 @@ internal fun confirmScores(inputs: List<String>, players: List<String?>): ScoreC
             else -> null
         }
     }
-    val parsedScores = inputs.map(String::toIntOrNull)
-    val fieldErrors = inputs.mapIndexed { index, input ->
+    val fieldErrors = inputs.map { input ->
         when {
             input.isEmpty() -> "素点を入力してください。"
-            parsedScores[index] == null -> "素点を点単位の整数で入力してください。"
+            input.toIntOrNull() == null -> "素点を点単位の整数で入力してください。"
             else -> null
         }
     }
@@ -73,13 +70,21 @@ internal fun confirmScores(inputs: List<String>, players: List<String?>): ScoreC
         return ScoreConfirmation(fieldErrors = fieldErrors, playerErrors = playerErrors)
     }
 
-    val scores = parsedScores.filterNotNull()
+    return null
+}
+
+internal fun confirmValidScores(
+    scores: List<Int>,
+    players: List<String?>,
+    names: Map<String, String>,
+    points: PlacementPoints,
+): ScoreConfirmation {
     val rawScores = RawScores(scores[0], scores[1], scores[2], scores[3])
-    return when (val result = calculateMatchResults(rawScores, mLeaguePoints)) {
+    return when (val result = calculateMatchResults(rawScores, points)) {
         is MatchResult.Failure -> ScoreConfirmation(calculationError = result.reason.message())
         is MatchResult.Success -> ScoreConfirmation(rows = result.players.mapIndexed { index, player ->
             ScoreResultRow(
-                name = scorePlayerNames.getValue(checkNotNull(players[index])),
+                name = names.getValue(checkNotNull(players[index])),
                 score = formatScore(scores[index].toLong()),
                 place = player.place,
                 points = formatPoints(player.pointsInTenths),

@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -32,10 +38,27 @@ kotlin {
         }
 
         withHostTest {}
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
     }
 
     sourceSets {
+        if (providers.gradleProperty("hmcRecreationCheck").orNull == "true") {
+            commonMain {
+                kotlin.srcDir("src/recreationCheck/kotlin")
+            }
+            androidMain {
+                kotlin.srcDir("src/recreationCheckAndroid/kotlin")
+            }
+            matching { it.name == "iosMain" }.configureEach {
+                kotlin.srcDir("src/recreationCheckIos/kotlin")
+            }
+        }
         commonMain.dependencies {
+            api(libs.coroutines.core)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -44,5 +67,27 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+        getByName("androidDeviceTest") {
+            kotlin.srcDir("src/persistenceTest/kotlin")
+            dependencies {
+                implementation(libs.androidx.test.runner)
+                implementation(kotlin("test-junit"))
+            }
+        }
+        matching { it.name == "iosTest" }.configureEach {
+            kotlin.srcDir("src/persistenceTest/kotlin")
+        }
     }
+}
+
+dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+}
+
+// Compose 1.12.2 leaves the output directory unset for this AGP device-test task.
+// The device tests have no Compose resources of their own.
+tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }.configureEach {
+    enabled = false
 }
