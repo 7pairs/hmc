@@ -12,6 +12,7 @@ plugins {
 dependencies {
     implementation(projects.shared)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.compose.runtime)
 }
 
@@ -32,6 +33,13 @@ android {
         }
     }
     buildTypes {
+        if (providers.gradleProperty("hmcRecreationCheck").orNull == "true") {
+            getByName("debug").applicationIdSuffix = ".recreation"
+            sourceSets.getByName("debug") {
+                kotlin.directories.add("src/recreationCheck/kotlin")
+                manifest.srcFile("src/recreationCheck/AndroidManifest.xml")
+            }
+        }
         getByName("release") {
             isMinifyEnabled = false
         }

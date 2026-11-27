@@ -8,13 +8,28 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val container = (application as HmcApplication).container
+        val draft = savedStateRegistry.consumeRestoredStateForKey(CHRONICLE_TASK_STATE)
+        val model = ViewModelProvider.create(this, factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                EntryViewModel(container.restoreAndroidTaskState(draft)) as T
+        })[EntryViewModel::class]
+        savedStateRegistry.registerSavedStateProvider(CHRONICLE_TASK_STATE, model.state::saveAndroidTaskState)
         setContent {
-            App()
+            App(model.state, model.viewModelScope)
         }
     }
 }
+
+private const val CHRONICLE_TASK_STATE = "chronicle.task"
+
+private class EntryViewModel(val state: ChronicleState) : ViewModel()

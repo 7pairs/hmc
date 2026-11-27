@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 HASEBA Junya (7pairs)
+SPDX-License-Identifier: Apache-2.0
+Source: https://github.com/7pairs/hmc
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name=".RecreationCheckActivity" android:exported="true" />
+    </application>
+</manifest>

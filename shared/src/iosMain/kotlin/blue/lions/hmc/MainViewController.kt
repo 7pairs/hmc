@@ -5,5 +5,14 @@
 package blue.lions.hmc
 
 import androidx.compose.ui.window.ComposeUIViewController
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 
-fun MainViewController() = ComposeUIViewController { App() }
+class IosEntryOwner(container: AppContainer) {
+    private val state = container.createState()
+    private val scope = MainScope()
+
+    fun makeViewController() = ComposeUIViewController { App(state, scope) }
+
+    fun close() { scope.cancel() }
+}
