@@ -7,6 +7,7 @@ package blue.lions.hmc
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlin.coroutines.cancellation.CancellationException
@@ -48,6 +49,8 @@ class ChronicleState internal constructor(
     })
         private set
     internal var nameResult by mutableStateOf<NameResult?>(null)
+        private set
+    internal var playerSaveVersion by mutableIntStateOf(0)
         private set
     internal var writingPlayer by mutableStateOf(false)
         private set
@@ -136,6 +139,7 @@ class ChronicleState internal constructor(
                     if (error is CancellationException) throw error
                     screen = Screen.LOAD_FAILED
                 }
+                playerSaveVersion++
             }
             nameResult = result
         } catch (error: Exception) {

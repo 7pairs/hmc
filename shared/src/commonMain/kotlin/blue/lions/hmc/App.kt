@@ -220,7 +220,16 @@ private fun PlayerRegistrationScreen(state: ChronicleState, scope: CoroutineScop
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     var name by rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    val nameError = when (state.nameResult) {
+    val nameResult = state.nameResult
+    val saveVersion = state.playerSaveVersion
+    LaunchedEffect(saveVersion) {
+        // Keep success available so a recreated form can also clear its restored input.
+        if (state.playerSaveVersion == saveVersion && state.nameResult == NameResult.SAVED) {
+            editingId = null
+            name = ""
+        }
+    }
+    val nameError = when (nameResult) {
         NameResult.EMPTY -> "表示名を入力してください。"
         NameResult.DUPLICATE -> "その表示名は登録済みです。"
         NameResult.FAILED -> "表示名を保存できませんでした。もう一度お試しください。"
@@ -263,14 +272,10 @@ private fun PlayerRegistrationScreen(state: ChronicleState, scope: CoroutineScop
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(enabled = !state.writingPlayer, onClick = {
+                val playerId = editingId
+                val displayName = name
                 focusManager.clearFocus()
-                scope.launch {
-                    state.writePlayer(editingId, name)
-                    if (state.nameResult == NameResult.SAVED) {
-                        editingId = null
-                        name = ""
-                    }
-                }
+                scope.launch { state.writePlayer(playerId, displayName) }
             }) {
                 Text(if (editingId == null) "登録する" else "変更を保存")
             }

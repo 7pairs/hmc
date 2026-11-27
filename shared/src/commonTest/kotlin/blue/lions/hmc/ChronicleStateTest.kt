@@ -5,6 +5,7 @@
 package blue.lions.hmc
 
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.runtime.snapshots.Snapshot
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.startCoroutine
@@ -32,6 +33,27 @@ class ChronicleStateTest {
         val reopened = ChronicleState(repository, { error("unexpected ID") }, { 42L })
         reopened.loadPlayers()
         assertEquals(Screen.SCORES, reopened.screen)
+    }
+
+    @Test
+    fun consecutivePlayerSavesHaveDistinctVersionsWithoutObservingTheClearedResult() = immediate {
+        state.loadPlayers()
+        state.writePlayer(null, "A")
+        assertEquals(NameResult.SAVED, state.nameResult)
+        val firstVersion = state.playerSaveVersion
+
+        Snapshot.withMutableSnapshot {
+            state.clearNameResult()
+            state.writePlayer("A", "A changed")
+        }
+        assertEquals(NameResult.SAVED, state.nameResult)
+        val secondVersion = state.playerSaveVersion
+        assertEquals(firstVersion + 1, secondVersion)
+
+        state.clearNameResult()
+        state.writePlayer(null, "A changed")
+        assertEquals(NameResult.DUPLICATE, state.nameResult)
+        assertEquals(secondVersion, state.playerSaveVersion)
     }
 
     @Test
